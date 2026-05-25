@@ -32,6 +32,12 @@ jobs:
         sed -i 's|private static final String TARGET_URL = "https://www.google.com";|private static final String TARGET_URL = "${{ github.event.inputs.target_url }}";|g' app/src/main/java/com/mfumowako/link2apk/MainActivity.java
         sed -i 's/android:label="Link2APK App"/android:label="${{ github.event.inputs.app_name }}"/g' app/src/main/AndroidManifest.xml
 
+    - name: Kushusha na Kuweka Injini ya Gradle Wrapper (.jar missing)
+      run: |
+        mkdir -p gradle/wrapper
+        # Amri hii inapakua lile faili la jar lililokosekana moja kwa moja kutoka mtandao rasmi wa Gradle
+        curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar
+
     - name: Kutoa ruhusa ya kiusalama kwa gradlew
       run: chmod +x gradlew
 
