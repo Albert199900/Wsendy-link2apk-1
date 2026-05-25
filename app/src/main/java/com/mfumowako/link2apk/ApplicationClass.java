@@ -6,22 +6,20 @@ import com.onesignal.debug.LogLevel;
 
 public class ApplicationClass extends Application {
 
-    // Hapa tumeweka kile kitambulisho chako rasmi ulichonipa
+    // Kitambulisho chako rasmi cha OneSignal
     private static final String ONESIGNAL_APP_ID = "54fbaf94-92dc-4d92-b2ee-7a7d3f1754d0";
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        // Washa ripoti za kiufundi kwa ajili ya kuona makosa (Unaweza kuifuta ikishakuwa sokoni)
+        // Washa ripoti za kiufundi kwa ajili ya kuona makosa ya mfumo
         OneSignal.getDebug().setLogLevel(LogLevel.VERBOSE);
 
         // Kuwasha rasmi mfumo wa OneSignal kwenye simu ya mteja
         OneSignal.initWithContext(this, ONESIGNAL_APP_ID);
-
-        // Kuomba ruhusa ya Notification kwa mfumo wa kisasa wa OneSignal v5
-        OneSignal.getNotifications().requestPermission(true, continueWith -> {
-            // Hapa inasubiri mtumiaji akubali au akatae
-        });
+        
+        // KUMBUKA: Ruhusa ya Notification tunaomba kitalaamu kule kwenye MainActivity.java
+        // ili kuzuia fujo za compiler wa Java na Kotlin hapa.
     }
 }
