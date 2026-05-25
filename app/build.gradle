@@ -35,4 +35,5 @@ dependencies {
     
     // MKATABA MPYA: OneSignal SDK ya Push Notifications (v5)
     implementation 'com.onesignal:OneSignal:[5.6.1, 5.9.99]'
+    implementation 'androidx.biometric:biometric:1.1.0'
 }
