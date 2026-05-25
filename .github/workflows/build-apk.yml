@@ -11,6 +11,10 @@ on:
         description: 'Link ya Tovuti Yako'
         required: true
         default: 'https://www.google.com'
+      logo_url:
+        description: 'Link ya Logo ya App (.png au .jpg)'
+        required: true
+        default: 'https://cdn-icons-png.flaticon.com/512/888/888857.png'
 
 jobs:
   build:
@@ -26,17 +30,20 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Kuingiza Link na Jina la Mteja kwenye Kodi ya Android
+    - name: Kuingiza Link, Jina, na Logo kwenye App
       run: |
+        # Kuzuia error: tengeneza mafolda ya kodi na picha kama hayapo
         mkdir -p app/src/main/java/com/mfumowako/link2apk
+        mkdir -p app/src/main/res/drawable
+        
+        # 1. Badilisha Link ya mteja kwenye MainActivity.java
         sed -i 's|private static final String TARGET_URL = "https://www.google.com";|private static final String TARGET_URL = "${{ github.event.inputs.target_url }}";|g' app/src/main/java/com/mfumowako/link2apk/MainActivity.java
+        
+        # 2. Badilisha Jina la App kwenye AndroidManifest.xml
         sed -i 's/android:label="Link2APK App"/android:label="${{ github.event.inputs.app_name }}"/g' app/src/main/AndroidManifest.xml
-
-    - name: Kushusha na Kuweka Injini ya Gradle Wrapper (.jar missing)
-      run: |
-        mkdir -p gradle/wrapper
-        # Amri hii inapakua lile faili la jar lililokosekana moja kwa moja kutoka mtandao rasmi wa Gradle
-        curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar
+        
+        # 3. Pakua Logo ya mteja na kuiweka kama Icon ya App
+        curl -L -o app/src/main/res/drawable/ic_launcher_custom.png "${{ github.event.inputs.logo_url }}"
 
     - name: Kutoa ruhusa ya kiusalama kwa gradlew
       run: chmod +x gradlew
