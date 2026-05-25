@@ -13,7 +13,7 @@
             🚀 Link2APK
         </h1>
         <span class="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full font-medium border border-green-500/30">
-            Mfumo upo Hewani
+            Mfumo upo Hewani (Salama)
         </span>
     </header>
 
@@ -22,19 +22,33 @@
             Badilisha Tovuti Yako Kuwa <span class="text-blue-500">Android App</span>
         </h2>
         <p class="text-gray-400 text-lg mb-8">
-            Weka link ya tovuti yako na jina la App, mfumo wetu utatengeneza APK ya kisasa (yenye muonekano kama Facebook/YouTube na isiyocrash) kiotomatiki kabisa.
+            Weka maelezo ya mteja hapa chini ili kuanza kutengeneza APK kiotomatiki kabisa.
         </p>
 
         <div class="bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-750 text-left">
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-red-400 mb-2">Weka GitHub Token Yako (Kwa ajili ya kuwasha mtambo tu)</label>
+                <input type="password" id="githubToken" placeholder="Paste github_pat_..." 
+                       class="w-full px-4 py-3 bg-gray-700 border border-red-900/50 rounded-lg focus:outline-none focus:border-red-500 text-white placeholder-gray-500">
+            </div>
+            
+            <hr class="border-gray-700 my-6">
+
             <div class="mb-5">
                 <label class="block text-sm font-medium text-gray-300 mb-2">Jina la App Yako</label>
                 <input type="text" id="appName" placeholder="Mfano: Shule Yangu App" 
                        class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white placeholder-gray-400">
             </div>
 
-            <div class="mb-6">
+            <div class="mb-5">
                 <label class="block text-sm font-medium text-gray-300 mb-2">Link ya Tovuti (URL)</label>
                 <input type="url" id="targetUrl" placeholder="Mfano: https://tovuti.com" 
+                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white placeholder-gray-400">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Link ya Picha/Logo ya App</label>
+                <input type="url" id="appLogo" placeholder="Mfano: https://tovuti.com/logo.png" 
                        class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white placeholder-gray-400">
             </div>
 
@@ -46,35 +60,38 @@
 
         <div id="maelekezo" class="hidden mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-400 text-left">
             <p class="font-semibold mb-1">Mchakato umeanza vizuri! 🎉</p>
-            <p>GitHub Actions sasa hivi inaunda App yako kwa nyuma. Ili kuishusha (Download) ikikamilika, nenda kwenye tab ya <strong>Actions</strong> kule GitHub.</p>
+            <p>GitHub Actions sasa hivi inaunda App yako kwa nyuma. Unaweza kuicheki kwenye tab ya <strong>Actions</strong> kule GitHub.</p>
         </div>
     </main>
 
     <footer class="text-center py-8 text-gray-600 text-xs border-t border-gray-800 mt-12">
-        &copy; 2026 Mfumo wa Link2APK. Haki zote zimehifadhiwa.
+        &copy; 2026 Mfumo wa Link2APK. Mfumo upo Salama 100%.
     </footer>
 
     <script>
         function anzishaUjenzi() {
+            const tokenKwenyeSkrini = document.getElementById('githubToken').value;
             const jina = document.getElementById('appName').value;
             const link = document.getElementById('targetUrl').value;
+            let logo = document.getElementById('appLogo').value;
 
-            if(!jina || !link) {
-                alert('Tafadhali jaza nafasi zote mbili!');
+            if(!tokenKwenyeSkrini || !jina || !link) {
+                alert('Tafadhali jaza Token, Jina na Link ya Tovuti!');
                 return;
             }
 
-            // WEKA ILE TOKEN YAKO YA GITHUB HAPA CHINI
-            const GITHUB_TOKEN = "bbbbbnnnnnn"; 
+            if(!logo) {
+                logo = "https://cdn-icons-png.flaticon.com/512/888/888857.png";
+            }
+
             const OWNER = "Albert199900";
             const REPO = "Wsendy-link2apk-1";
             const WORKFLOW_ID = "build-apk.yml"; 
 
-            // Tuma ombi la kuwasha mtambo GitHub Actions
             fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    'Authorization': `Bearer ${tokenKwenyeSkrini}`, // Inachukua token toka skrini tu!
                     'Accept': 'application/vnd.github+json',
                     'Content-Type': 'application/json'
                 },
@@ -82,22 +99,20 @@
                     ref: 'main', 
                     inputs: {
                         app_name: jina,
-                        target_url: link
+                        target_url: link,
+                        logo_url: logo
                     }
                 })
             })
             .then(response => {
                 if(response.status === 204) {
                     document.getElementById('maelekezo').classList.remove('hidden');
-                    alert('🎉 Umefaulu! Mtambo umeanza kuunda APK yako sasa hivi kwa nyuma.');
+                    alert('🎉 Mfumo umepokea ombi na umeanza kuweka Nembo yako kwenye APK!');
                 } else {
-                    alert('Kuna shida ya ruhusa (Token)! Hakikisha token uliyoweka ni sahihi.');
+                    alert('Kuna shida! Hakikisha Token uliyoiandika kwenye skrini ni sahihi na ina ruhusa ya Actions.');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Imeshindwa kuwasiliana na GitHub.');
-            });
+            .catch(error => console.error('Error:', error));
         }
     </script>
 </body>
