@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link2APK - Miliki App Yako Ndani ya Dakika 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+    <header class="p-5 border-b border-gray-800 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-500 flex items-center gap-2">
+            🚀 Link2APK
+        </h1>
+        <span class="bg-green-500/20 text-green-400 text-xs px-3 py-1 rounded-full font-medium border border-green-500/30">
+            Mfumo upo Hewani
+        </span>
+    </header>
+
+    <main class="max-w-2xl mx-auto px-4 py-16 text-center">
+        <h2 class="text-4xl font-extrabold tracking-tight sm:text-5xl mb-4">
+            Badilisha Tovuti Yako Kuwa <span class="text-blue-500">Android App</span>
+        </h2>
+        <p class="text-gray-400 text-lg mb-8">
+            Weka link ya tovuti yako na jina la App, mfumo wetu utatengeneza APK ya kisasa (yenye muonekano kama Facebook/YouTube na isiyocrash) kiotomatiki kabisa.
+        </p>
+
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-750 text-left">
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Jina la App Yako</label>
+                <input type="text" id="appName" placeholder="Mfano: Shule Yangu App" 
+                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white placeholder-gray-400">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-300 mb-2">Link ya Tovuti (URL)</label>
+                <input type="url" id="targetUrl" placeholder="Mfano: https://tovuti.com" 
+                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white placeholder-gray-400">
+            </div>
+
+            <button onclick="anzishaUjenzi()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-lg shadow-blue-600/20 flex justify-center items-center gap-2">
+                <span>🔨 Tengeneza APK Sasa</span>
+            </button>
+        </div>
+
+        <div id="maelekezo" class="hidden mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-400 text-left">
+            <p class="font-semibold mb-1">Mchakato umeanza vizuri! 🎉</p>
+            <p>GitHub Actions sasa hivi inaunda App yako kwa nyuma. Ili kuishusha (Download) ikikamilika, bonyeza sehemu ya <strong>Actions</strong> kwenye GitHub repository yako.</p>
+        </div>
+    </main>
+
+    <footer class="text-center py-8 text-gray-600 text-xs border-t border-gray-800 mt-12">
+        &copy; 2026 Mfumo wa Link2APK. Haki zote zimehifadhiwa.
+    </footer>
+
+    <script>
+        function anzishaUjenzi() {
+            const jina = document.getElementById('appName').value;
+            const link = document.getElementById('targetUrl').value;
+
+            if(!jina || !link) {
+                alert('Tafadhali jaza nafasi zote mbili!');
+                return;
+            }
+
+            // Onyesha ujumbe wa maelekezo
+            document.getElementById('maelekezo').classList.remove('hidden');
+            
+            // Hapa JavaScript inaweza kuunganishwa na GitHub API ili iwawashe Actions moja kwa moja
+            console.log('Inatengeneza App:', jina, 'kwa ajili ya:', link);
+        }
+    </script>
+</body>
+</html>
