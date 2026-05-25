@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 super.onPageStarted(view, url, favicon);
                 progressBar.setVisibility(View.VISIBLE);
                 offlineLayout.setVisibility(View.GONE); // Ficha kosa wakati inaanza upya
-                myWebView.setVisibility(View.getSystemUiVisibility());
+                myWebView.setVisibility(View.VISIBLE); // <--- HAPA TUMESAFHISHA SIKU HIZI!
             }
 
             @Override
@@ -96,17 +96,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Kudhibiti maombi ya Kamera, Sauti na Location kutoka kwenye Tovutienyewe
+        // Kudhibiti maombi ya Kamera, Sauti na Location kutoka kwenye Tovuti yenyewe
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                // Inaruhusu tovuti kutumia kamera au maiki kama simu imesharuhusu
                 request.grant(request.getResources());
             }
 
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                // Inaruhusu tovuti kupata eneo (Location) la mtumiaji
                 callback.invoke(origin, true, false);
             }
         });
@@ -167,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             listPermissionsNeeded.add(Manifest.permission.READ_CONTACTS);
         }
-        // Ruhusa ya Notifications ni maalum kwa Android 13 (API 33) na kuendelea
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 listPermissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
