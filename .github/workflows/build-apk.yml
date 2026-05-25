@@ -1,0 +1,47 @@
+name: Tengeneza Link2APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'Jina la App Yako (Mfano: Facebook Tz)'
+        required: true
+        default: 'Aplikasi Yangu'
+      target_url:
+        description: 'Link ya Tovuti Yako (Mfano: https://google.com)'
+        required: true
+        default: 'https://www.google.com'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Kushusha kodi kutoka Repository
+      uses: actions/checkout@v4
+
+    - name: Kuweka Java mazingira ya kazi
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Kuingiza Link na Jina la Mteja kwenye Kodi ya Android
+      run: |
+        # Badilisha Link ya mteja kwenye MainActivity.java
+        sed -i 's|private static final String TARGET_URL = "https://www.google.com";|private static final String TARGET_URL = "${{ github.event.inputs.target_url }}";|g' app/src/main/java/com/mfumowako/link2apk/MainActivity.java
+        
+        # Badilisha Jina la App kwenye AndroidManifest.xml
+        sed -i 's/android:label="Link2APK App"/android:label="${{ github.event.inputs.app_name }}"/g' app/src/main/AndroidManifest.xml
+
+    - name: Kutoa ruhusa kwa Gradle (Build Tool)
+      run: chmod +x gradlew
+
+    - name: Kuanza kutengeneza APK (Build APK)
+      run: ./gradlew assembleDebug
+
+    - name: Kuhifadhi APK iliyokamilika ili Mteja aishushe (Download)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.inputs.app_name }}-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
