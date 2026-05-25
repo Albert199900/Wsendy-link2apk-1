@@ -33,21 +33,26 @@ jobs:
     - name: Kushusha na Kuweka Injini ya Gradle Wrapper (.jar)
       run: |
         mkdir -p gradle/wrapper
-        # Amri hii inahakikisha lile faili la jar halikosekani tena
         curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar
 
-    - name: Kuingiza Link, Jina, na Logo kwenye App
+    - name: Kuingiza Link, Jina, Logo, na Kutengeneza Kitambulisho cha Kipekee
       run: |
         mkdir -p app/src/main/java/com/mfumowako/link2apk
         mkdir -p app/src/main/res/drawable
         
-        # 1. Badilisha Link ya mteja kwenye MainActivity.java
+        # Amri hii inachukua jina la App, inaondoa nafasi, na herufi kubwa ili kupata herufi safi za Kitambulisho
+        PKG_NAME=$(echo "${{ github.event.inputs.app_name }}" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]')
+        
+        # 1. Badilisha Kitambulisho cha App (Application ID) kwenye app/build.gradle kiotomatiki
+        sed -i "s/applicationId \"com.mfumowako.link2apk\"/applicationId \"com.link2apk.${PKG_NAME}\"/g" app/build.gradle
+        
+        # 2. Badilisha Link ya mteja kwenye MainActivity.java
         sed -i 's|private static final String TARGET_URL = "https://www.google.com";|private static final String TARGET_URL = "${{ github.event.inputs.target_url }}";|g' app/src/main/java/com/mfumowako/link2apk/MainActivity.java
         
-        # 2. Badilisha Jina la App kwenye AndroidManifest.xml
+        # 3. Badilisha Jina la App kwenye AndroidManifest.xml
         sed -i 's/android:label="Link2APK App"/android:label="${{ github.event.inputs.app_name }}"/g' app/src/main/AndroidManifest.xml
         
-        # 3. Pakua Logo ya mteja na kuiweka kama Icon ya App
+        # 4. Pakua Logo ya mteja na kuiweka kama Icon ya App
         curl -L -o app/src/main/res/drawable/ic_launcher_custom.png "${{ github.event.inputs.logo_url }}"
 
     - name: Kutoa ruhusa ya kiusalama kwa gradlew
