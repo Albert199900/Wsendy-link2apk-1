@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       app_name:
-        description: 'Jina la App Yako (Mfano: Facebook Tz)'
+        description: 'Jina la App Yako'
         required: true
         default: 'Aplikasi Yangu'
       target_url:
-        description: 'Link ya Tovuti Yako (Mfano: https://google.com)'
+        description: 'Link ya Tovuti Yako'
         required: true
         default: 'https://www.google.com'
 
@@ -28,19 +28,17 @@ jobs:
 
     - name: Kuingiza Link na Jina la Mteja kwenye Kodi ya Android
       run: |
-        # Badilisha Link ya mteja kwenye MainActivity.java
+        mkdir -p app/src/main/java/com/mfumowako/link2apk
         sed -i 's|private static final String TARGET_URL = "https://www.google.com";|private static final String TARGET_URL = "${{ github.event.inputs.target_url }}";|g' app/src/main/java/com/mfumowako/link2apk/MainActivity.java
-        
-        # Badilisha Jina la App kwenye AndroidManifest.xml
         sed -i 's/android:label="Link2APK App"/android:label="${{ github.event.inputs.app_name }}"/g' app/src/main/AndroidManifest.xml
 
-    - name: Kutoa ruhusa kwa Gradle (Build Tool)
+    - name: Kutoa ruhusa ya kiusalama kwa gradlew
       run: chmod +x gradlew
 
-    - name: Kuanza kutengeneza APK (Build APK)
+    - name: Kuanza kutengeneza APK na Kuweka Saini
       run: ./gradlew assembleDebug
 
-    - name: Kuhifadhi APK iliyokamilika ili Mteja aishushe (Download)
+    - name: Kuhifadhi APK iliyokamilika
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.inputs.app_name }}-APK
