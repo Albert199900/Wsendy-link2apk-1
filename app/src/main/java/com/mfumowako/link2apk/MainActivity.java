@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
@@ -33,6 +34,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         swipeRefresh = findViewById(R.id.swipe_refresh);
         offlineLayout = findViewById(R.id.offline_layout);
         btnRetry = findViewById(R.id.btn_retry);
+        FloatingActionButton btnCamera = findViewById(R.id.btn_camera);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
         // Kuomba Ruhusa za kawaida
@@ -76,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setGeolocationEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // [MBORESHO 1] - Mfumo wa Kudownload Mafaili
+        // Mfumo wa Kudownload Mafaili
         myWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
             try {
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -130,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // [MBORESHO 2] - Kudhibiti maombi ya Kamera, Location na Kupandisha Mafaili (Upload)
+        // Kudhibiti maombi ya Kamera, Location na Kupandisha Mafaili (Upload)
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
@@ -142,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
                 callback.invoke(origin, true, false);
             }
 
-            // Hapa ndipo ufunguo wa kufungua Gallery/Camera kupakia picha ulipo
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 if (mUploadMessage != null) {
@@ -157,6 +159,17 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
                 return true;
+            }
+        });
+
+        // TUPO HAPA: Kitufe sasa hivi kinafungua Kamera kamili ya mfumo (Picha + Video)
+        btnCamera.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                // Hii amri inafungua App nzima ya Kamera ili mtumiaji achague kupiga picha au kurekodi video
+                Intent cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+                startActivity(cameraIntent);
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
             }
         });
 
@@ -189,37 +202,32 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // [MBORESHO 3] - KUWASHA MFUMO WA ALAMA YA KIDOLE / PIN
+        // KUWASHA MFUMO WA ALAMA YA KIDOLE / PIN
         KaguaUlinziWaBiometric();
     }
 
-    // Mtambo maalum wa kukagua na kuonyesha bango la ulinzi wa kidole
     private void KaguaUlinziWaBiometric() {
         BiometricManager biometricManager = BiometricManager.from(this);
         int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
         if (biometricManager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS) {
-            // Kifaa kina ulinzi (Fingerprint au PIN) - Onyesha bango
             Executor executor = ContextCompat.getMainExecutor(this);
             BiometricPrompt biometricPrompt = new BiometricPrompt(MainActivity.this, executor, new BiometricPrompt.AuthenticationCallback() {
                 @Override
                 public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                     super.onAuthenticationError(errorCode, errString);
-                    // Mtumiaji akighairi au akifeli, funga App kwa usalama wake
                     finish();
                 }
 
                 @Override
                 public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                     super.onAuthenticationSucceeded(result);
-                    // Amefanikiwa thibitisho! Ruhusu tovuti ifunguke sasa
                     runOnUiThread(() -> myWebView.loadUrl(TARGET_URL));
                 }
 
                 @Override
                 public void onAuthenticationFailed() {
                     super.onAuthenticationFailed();
-                    // Alama imekataa, inaendelea kumsikiliza hadi afanye vizuri au aghairi
                 }
             });
 
@@ -231,12 +239,10 @@ public class MainActivity extends AppCompatActivity {
 
             biometricPrompt.authenticate(promptInfo);
         } else {
-            // Kifaa hakina ulinzi wowote (Fungua App moja kwa moja)
             myWebView.loadUrl(TARGET_URL);
         }
     }
 
-    // Kukamata picha iliyochaguliwa kutoka kwenye faili za simu kwa ajili ya ku-upload
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
