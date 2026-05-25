@@ -30,9 +30,14 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
+    - name: Kushusha na Kuweka Injini ya Gradle Wrapper (.jar)
+      run: |
+        mkdir -p gradle/wrapper
+        # Amri hii inahakikisha lile faili la jar halikosekani tena
+        curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar
+
     - name: Kuingiza Link, Jina, na Logo kwenye App
       run: |
-        # Kuzuia error: tengeneza mafolda ya kodi na picha kama hayapo
         mkdir -p app/src/main/java/com/mfumowako/link2apk
         mkdir -p app/src/main/res/drawable
         
