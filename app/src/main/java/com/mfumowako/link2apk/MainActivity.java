@@ -101,11 +101,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Kudhibiti Loading na Offline
+        // Kudhibiti Loading na Offline (Kosa la super.onCreate limeshafutwa hapa)
         myWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onCreate();
                 super.onPageStarted(view, url, favicon);
                 progressBar.setVisibility(View.VISIBLE);
                 offlineLayout.setVisibility(View.GONE);
@@ -147,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
                 callback.invoke(origin, true, false);
             }
 
-            // Inaruhusu kufungua kamera/faili wakati wa ku-upload kitu kwenye tovuti
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 if (mUploadMessage != null) {
@@ -174,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Kitufe cha Kamera (Kimesahihishwa kisilete crash)
+        // Kitufe cha Kamera
         if (btnCamera != null) {
             btnCamera.setOnClickListener(v -> {
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -232,9 +230,6 @@ public class MainActivity extends AppCompatActivity {
                     if (dataString != null) {
                         results = new Uri[]{Uri.parse(dataString)};
                     }
-                } else {
-                    // Ikiwa data ni null, inawezekana alipiga picha ya kamera moja kwa moja
-                    // Unaweza kuongeza usindikaji wa picha hapa ikihitajika mbeleni
                 }
             }
             mUploadMessage.onReceiveValue(results);
