@@ -1,4 +1,4 @@
-name: Tengeneza Link2APK (Release APK)
+name: Tengeneza Link2APK (Release Rasmi)
 
 on:
   workflow_dispatch:
@@ -50,18 +50,31 @@ jobs:
     - name: Kutoa ruhusa ya kiusalama kwa gradlew
       run: chmod +x gradlew
 
-    - name: Kuanza kutengeneza APK
-      run: ./gradlew assembleDebug
+    - name: Kuanza kutengeneza APK ya Release
+      run: ./gradlew assembleRelease
 
-    - name: Kuhifadhi APK iliyokamilika (GitHub Artifact)
+    - name: Kusaini APK ya Release Kiotomatiki
+      uses: ilharp/sign-android-release@v1
+      id: sign_app
+      with:
+        releaseDir: app/build/outputs/apk/release
+        signingKey: ${{ secrets.SIGNING_KEY }}
+        keyAlias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Kuhifadhi APK Imesainiwa (GitHub Artifact)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.inputs.app_name }}-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: ${{ github.event.inputs.app_name }}-Release-APK
+        path: app/build/outputs/apk/release/*-signed.apk
 
-    - name: Sukuma APK kwenda Firebase Storage Moja kwa Moja
-      uses: w9jds/firebase-action@master
+    # HAPA NDIO TUMEREKEBISHA: Tunatumia Google Cloud SDK iliyopo ndani ya GitHub kurusha faili moja kwa moja
+    - name: Kujiunga na Google Cloud (Firebase)
+      uses: google-github-actions/auth@v2
       with:
-        args: storage:upload app/build/outputs/apk/debug/app-debug.apk --bucket studio-6468952106-54f12.firebasestorage.app
-      env:
-        GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+    - name: Sukuma APK Imesainiwa kwenda Firebase Storage
+      run: |
+        gcloud storage cp app/build/outputs/apk/release/app-release-unsigned-signed.apk gs://studio-6468952106-54f12.firebasestorage.app/wsendy-app.apk
