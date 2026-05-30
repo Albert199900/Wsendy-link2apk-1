@@ -30,6 +30,11 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
+    # HATUA MPYA: Inaweka build-tools 29.0.3 ili zipalign ipatikane kwa ajili ya kusaini APK
+    - name: Kuweka Android SDK Build Tools 29.0.3
+      run: |
+        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;29.0.3"
+
     - name: Kushusha na Kuweka Injini ya Gradle Wrapper (.jar)
       run: |
         mkdir -p gradle/wrapper
