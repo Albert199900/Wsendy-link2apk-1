@@ -28,23 +28,18 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.biometric.BiometricManager;
-import androidx.biometric.BiometricPrompt;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
 
     private WebView myWebView;
     private ProgressBar progressBar;
-    private SwipeRefreshLayout swipeRefresh;
     private LinearLayout offlineLayout;
     private Button btnRetry;
     
@@ -61,23 +56,26 @@ public class MainActivity extends AppCompatActivity {
         // Kuanzisha vishikwambi
         myWebView = findViewById(R.id.webview);
         progressBar = findViewById(R.id.loading_bar);
-        swipeRefresh = findViewById(R.id.swipe_refresh);
         offlineLayout = findViewById(R.id.offline_layout);
         btnRetry = findViewById(R.id.btn_retry);
         FloatingActionButton btnCamera = findViewById(R.id.btn_camera);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
-        // Kuomba Ruhusa za kawaida
+        // Kuomba Ruhusa zote mapema App ikifunguka
         checkAndRequestPermissions();
 
-        // Kusanidi WebView
+        // Kusanidi WebView ya Kisasa
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
         webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
         webSettings.setGeolocationEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            webSettings.setMediaPlaybackRequiresUserGesture(false);
+        }
 
         // Mfumo wa Kudownload Mafaili
         myWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
@@ -107,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         myWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onCreate();
                 super.onPageStarted(view, url, favicon);
                 progressBar.setVisibility(View.VISIBLE);
                 offlineLayout.setVisibility(View.GONE);
@@ -117,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 progressBar.setVisibility(View.GONE);
-                swipeRefresh.setRefreshing(false);
             }
 
             @Override
@@ -133,11 +131,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Kudhibiti maombi ya Kamera, Location na Kupandisha Mafaili (Upload)
+        // MFUMO MPYA WA RUHUSA ZA KAMERA NA PICHA NDANI YA WEBSITE
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                request.grant(request.getResources());
+                runOnUiThread(() -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        request.grant(request.getResources());
+                    }
+                });
             }
 
             @Override
@@ -145,36 +147,48 @@ public class MainActivity extends AppCompatActivity {
                 callback.invoke(origin, true, false);
             }
 
+            // Inaruhusu kufungua kamera/faili wakati wa ku-upload kitu kwenye tovuti
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 if (mUploadMessage != null) {
                     mUploadMessage.onReceiveValue(null);
                 }
                 mUploadMessage = filePathCallback;
-                Intent intent = fileChooserParams.createIntent();
+                
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                Intent contentSelectionIntent = fileChooserParams.createIntent();
+                
+                Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
+                chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
+                chooserIntent.putExtra(Intent.EXTRA_TITLE, "Chagua Action au Faili:");
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takePictureIntent});
+                
                 try {
-                    startActivityForResult(intent, FILECHOOSER_RESULTCODE);
+                    startActivityForResult(chooserIntent, FILECHOOSER_RESULTCODE);
                 } catch (Exception e) {
                     mUploadMessage = null;
+                    Toast.makeText(MainActivity.this, "Huwezi kufungua stoo ya faili", Toast.LENGTH_SHORT).show();
                     return false;
                 }
                 return true;
             }
         });
 
-        // TUPO HAPA: Kitufe sasa hivi kinafungua Kamera kamili ya mfumo (Picha + Video)
-        btnCamera.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                // Hii amri inafungua App nzima ya Kamera ili mtumiaji achague kupiga picha au kurekodi video
-                Intent cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-                startActivity(cameraIntent);
-            } else {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
-            }
-        });
-
-        // Swipe to Refresh
-        swipeRefresh.setOnRefreshListener(() -> myWebView.reload());
+        // Kitufe cha Kamera (Kimesahihishwa kisilete crash)
+        if (btnCamera != null) {
+            btnCamera.setOnClickListener(v -> {
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        Intent cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+                        startActivity(cameraIntent);
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Programu ya kamera haikupatikana!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
+                }
+            });
+        }
 
         // Retry Button
         btnRetry.setOnClickListener(v -> {
@@ -183,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
             myWebView.reload();
         });
 
-        // Bottom Navigation
+        // Bottom Navigation 
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
@@ -202,45 +216,8 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // KUWASHA MFUMO WA ALAMA YA KIDOLE / PIN
-        KaguaUlinziWaBiometric();
-    }
-
-    private void KaguaUlinziWaBiometric() {
-        BiometricManager biometricManager = BiometricManager.from(this);
-        int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
-
-        if (biometricManager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS) {
-            Executor executor = ContextCompat.getMainExecutor(this);
-            BiometricPrompt biometricPrompt = new BiometricPrompt(MainActivity.this, executor, new BiometricPrompt.AuthenticationCallback() {
-                @Override
-                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                    super.onAuthenticationError(errorCode, errString);
-                    finish();
-                }
-
-                @Override
-                public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
-                    super.onAuthenticationSucceeded(result);
-                    runOnUiThread(() -> myWebView.loadUrl(TARGET_URL));
-                }
-
-                @Override
-                public void onAuthenticationFailed() {
-                    super.onAuthenticationFailed();
-                }
-            });
-
-            BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Thibitisha Utambulisho")
-                    .setSubtitle("Weka alama ya kidole au PIN kufungua App")
-                    .setAllowedAuthenticators(authenticators)
-                    .build();
-
-            biometricPrompt.authenticate(promptInfo);
-        } else {
-            myWebView.loadUrl(TARGET_URL);
-        }
+        // Fungua Website yako moja kwa moja
+        myWebView.loadUrl(TARGET_URL);
     }
 
     @Override
@@ -248,7 +225,19 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILECHOOSER_RESULTCODE) {
             if (mUploadMessage == null) return;
-            mUploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+            Uri[] results = null;
+            if (resultCode == RESULT_OK) {
+                if (data != null) {
+                    String dataString = data.getDataString();
+                    if (dataString != null) {
+                        results = new Uri[]{Uri.parse(dataString)};
+                    }
+                } else {
+                    // Ikiwa data ni null, inawezekana alipiga picha ya kamera moja kwa moja
+                    // Unaweza kuongeza usindikaji wa picha hapa ikihitajika mbeleni
+                }
+            }
+            mUploadMessage.onReceiveValue(results);
             mUploadMessage = null;
         }
     }
@@ -257,7 +246,6 @@ public class MainActivity extends AppCompatActivity {
         myWebView.setVisibility(View.GONE);
         offlineLayout.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
-        swipeRefresh.setRefreshing(false);
     }
 
     private void checkAndRequestPermissions() {
