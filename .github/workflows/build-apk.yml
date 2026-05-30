@@ -72,7 +72,8 @@ jobs:
       with:
         credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-    # IMEREKEBISHA: Sasa hivi inatupa APK moja kwa moja ndani ya folda la internal_files/
-    - name: Sukuma APK Imesainiwa kwenda Firebase Storage
+    # HAPA NDIPO PALIPOREKEBISHWA: Inasukuma na kufungua ruhusa ya Public kwa kila mtu
+    - name: Sukuma APK Imesainiwa kwenda Firebase Storage na kuifanya Public
       run: |
         gcloud storage cp app/build/outputs/apk/release/wsendy-final.apk gs://studio-6468952106-54f12.firebasestorage.app/internal_files/wsendy-app.apk
+        gcloud storage objects update gs://studio-6468952106-54f12.firebasestorage.app/internal_files/wsendy-app.apk --add-acl-grant=entity=allUsers,role=READER
