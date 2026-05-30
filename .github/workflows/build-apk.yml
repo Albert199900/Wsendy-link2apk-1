@@ -1,4 +1,4 @@
-name: Tengeneza Link2APK (Release Imesainiwa)
+name: Tengeneza Link2APK (Release APK)
 
 on:
   workflow_dispatch:
@@ -30,11 +30,6 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # HATUA MPYA: Inaweka build-tools 29.0.3 ili zipalign ipatikane kwa ajili ya kusaini APK
-    - name: Kuweka Android SDK Build Tools 29.0.3
-      run: |
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "build-tools;29.0.3"
-
     - name: Kushusha na Kuweka Injini ya Gradle Wrapper (.jar)
       run: |
         mkdir -p gradle/wrapper
@@ -55,28 +50,18 @@ jobs:
     - name: Kutoa ruhusa ya kiusalama kwa gradlew
       run: chmod +x gradlew
 
-    - name: Kuanza kutengeneza APK ya Release
-      run: ./gradlew assembleRelease
+    - name: Kuanza kutengeneza APK
+      run: ./gradlew assembleDebug
 
-    - name: Kusaini APK ya Release Kiotomatiki
-      uses: r0adkll/sign-android-release@v1
-      id: sign_app
-      with:
-        releaseDirectory: app/build/outputs/apk/release
-        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-    - name: Kuhifadhi APK Imesainiwa (GitHub Artifact)
+    - name: Kuhifadhi APK iliyokamilika (GitHub Artifact)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.inputs.app_name }}-Signed-APK
-        path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+        name: ${{ github.event.inputs.app_name }}-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Sukuma APK Imesainiwa kwenda Firebase Storage
+    - name: Sukuma APK kwenda Firebase Storage Moja kwa Moja
       uses: w9jds/firebase-action@master
       with:
-        args: storage:upload ${{ steps.sign_app.outputs.signedReleaseFile }} --bucket studio-6468952106-54f12.firebasestorage.app
+        args: storage:upload app/build/outputs/apk/debug/app-debug.apk --bucket studio-6468952106-54f12.firebasestorage.app
       env:
         GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
