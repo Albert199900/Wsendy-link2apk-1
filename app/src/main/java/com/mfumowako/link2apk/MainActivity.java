@@ -43,11 +43,12 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout offlineLayout;
     private Button btnRetry;
     
+    // Weka URL yako halisi ya WSendy hapa
     private static final String TARGET_URL = "https://www.google.com"; 
     private static final int PERMISSION_REQUEST_CODE = 100;
     private static final int FILECHOOSER_RESULTCODE = 1;
     private ValueCallback<Uri[]> mUploadMessage;
-    private PermissionRequest mPermissionRequest; // Kibadilikaji cha kushikilia maombi ya Website
+    private PermissionRequest mPermissionRequest; 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +75,16 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setAllowContentAccess(true);
         webSettings.setGeolocationEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        
-        // MUHIMU: Inaruhusu ku-play video/audio bila kuhitaji mtumiaji kubonyeza 'Play'
         webSettings.setMediaPlaybackRequiresUserGesture(false);
+
+        // 1. MABORESHO YA MUONEKANO: Kulazimisha muonekano wa skrini pana (Kama Picha Yako)
+        String desktopUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        webSettings.setUserAgentString(desktopUserAgent);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setDisplayZoomControls(false); 
 
         // Mfumo wa Kudownload Mafaili
         myWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
@@ -132,44 +140,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // MFUMO ULIOREKEBISHWA WA RUHUSA ZA KAMERA NA AUDIO NDANI YA WEBSITE
+        // 2. MABORESHO YA RUHUSA: Kuruhusu Mic na Kamera kwa pamoja bila ubaguzi
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                mPermissionRequest = request; // Hifadhi ombi
-                
-                List<String> requestedPermissions = new ArrayList<>();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    for (String resource : request.getResources()) {
-                        if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
-                            requestedPermissions.add(Manifest.permission.CAMERA);
-                        } else if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) {
-                            requestedPermissions.add(Manifest.permission.RECORD_AUDIO);
-                        }
+                mPermissionRequest = request; 
+                runOnUiThread(() -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        // Inapatia website rasilimali zote inazoomba (Kamera + Mic kwa mpigo)
+                        request.grant(request.getResources());
                     }
-                }
-
-                // Angalia kama ruhusa za simu zimeshatolewa
-                boolean allGranted = true;
-                for (String perm : requestedPermissions) {
-                    if (ContextCompat.checkSelfPermission(MainActivity.this, perm) != PackageManager.PERMISSION_GRANTED) {
-                        allGranted = false;
-                        break;
-                    }
-                }
-
-                if (allGranted) {
-                    // Kama simu ilishatoa ruhusa, ipatie Website ruhusa zake hapo hapo
-                    runOnUiThread(() -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            request.grant(request.getResources());
-                        }
-                    });
-                } else {
-                    // Kama simu haina ruhusa, omba upya kwenye OS ya Android
-                    ActivityCompat.requestPermissions(MainActivity.this, 
-                            requestedPermissions.toArray(new String[0]), PERMISSION_REQUEST_CODE);
-                }
+                });
             }
 
             @Override
@@ -206,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Kitufe cha Kamera (Native)
+        // Kitufe cha Kamera
         if (btnCamera != null) {
             btnCamera.setOnClickListener(v -> {
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -248,22 +229,33 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Fungua Website yako moja kwa moja
+        // Fungua Website yako
         myWebView.loadUrl(TARGET_URL);
     }
 
-    // MAPOKEZI YA RUHUSA KUTOKA KWENYE ANDROID OS (BILA HII KAMERA HAITAFANYA KAZI)
+    // MAPOKEZI YA RUHUSA: Kurekebishwa ili ikubali hata kama mtumiaji ameruhusu zote
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Kama mtumiaji akibonyeza ALLOW, ipitishe kwenda kwenye website pia
+            boolean allGranted = true;
+            if (grantResults.length > 0) {
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        allGranted = false;
+                        break;
+                    }
+                }
+            } else {
+                allGranted = false;
+            }
+
+            if (allGranted) {
                 if (mPermissionRequest != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     mPermissionRequest.grant(mPermissionRequest.getResources());
                 }
             } else {
-                Toast.makeText(this, "Ruhusa imekataliwa! Website haitaweza kutumia Kamera/Audio.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Baadhi ya ruhusa zimekataliwa! Huenda Mic au Kamera isifanye kazi.", Toast.LENGTH_LONG).show();
             }
         }
     }
