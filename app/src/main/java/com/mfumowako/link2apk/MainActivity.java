@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private static final int FILECHOOSER_RESULTCODE = 1;
     private ValueCallback<Uri[]> mUploadMessage;
+    private PermissionRequest mPermissionRequest; // Kibadilikaji cha kushikilia maombi ya Website
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +74,9 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setAllowContentAccess(true);
         webSettings.setGeolocationEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            webSettings.setMediaPlaybackRequiresUserGesture(false);
-        }
+        
+        // MUHIMU: Inaruhusu ku-play video/audio bila kuhitaji mtumiaji kubonyeza 'Play'
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
 
         // Mfumo wa Kudownload Mafaili
         myWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
@@ -87,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
                 request.addRequestHeader("User-Agent", userAgent);
                 request.setDescription("Inapakua faili...");
                 request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimetype));
-                request.allowScanningByMediaScanner();
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimetype));
                 
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Kudhibiti Loading na Offline (Kosa la super.onCreate limeshafutwa hapa)
+        // Kudhibiti Loading na Offline
         myWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -124,21 +124,52 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) {
-                    OnyeshaUkurasaWaOffline();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (request.isForMainFrame()) {
+                        OnyeshaUkurasaWaOffline();
+                    }
                 }
             }
         });
 
-        // MFUMO MPYA WA RUHUSA ZA KAMERA NA PICHA NDANI YA WEBSITE
+        // MFUMO ULIOREKEBISHWA WA RUHUSA ZA KAMERA NA AUDIO NDANI YA WEBSITE
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                runOnUiThread(() -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        request.grant(request.getResources());
+                mPermissionRequest = request; // Hifadhi ombi
+                
+                List<String> requestedPermissions = new ArrayList<>();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    for (String resource : request.getResources()) {
+                        if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
+                            requestedPermissions.add(Manifest.permission.CAMERA);
+                        } else if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) {
+                            requestedPermissions.add(Manifest.permission.RECORD_AUDIO);
+                        }
                     }
-                });
+                }
+
+                // Angalia kama ruhusa za simu zimeshatolewa
+                boolean allGranted = true;
+                for (String perm : requestedPermissions) {
+                    if (ContextCompat.checkSelfPermission(MainActivity.this, perm) != PackageManager.PERMISSION_GRANTED) {
+                        allGranted = false;
+                        break;
+                    }
+                }
+
+                if (allGranted) {
+                    // Kama simu ilishatoa ruhusa, ipatie Website ruhusa zake hapo hapo
+                    runOnUiThread(() -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            request.grant(request.getResources());
+                        }
+                    });
+                } else {
+                    // Kama simu haina ruhusa, omba upya kwenye OS ya Android
+                    ActivityCompat.requestPermissions(MainActivity.this, 
+                            requestedPermissions.toArray(new String[0]), PERMISSION_REQUEST_CODE);
+                }
             }
 
             @Override
@@ -154,7 +185,10 @@ public class MainActivity extends AppCompatActivity {
                 mUploadMessage = filePathCallback;
                 
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                Intent contentSelectionIntent = fileChooserParams.createIntent();
+                Intent contentSelectionIntent = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    contentSelectionIntent = fileChooserParams.createIntent();
+                }
                 
                 Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
                 chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
@@ -172,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Kitufe cha Kamera
+        // Kitufe cha Kamera (Native)
         if (btnCamera != null) {
             btnCamera.setOnClickListener(v -> {
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -218,6 +252,22 @@ public class MainActivity extends AppCompatActivity {
         myWebView.loadUrl(TARGET_URL);
     }
 
+    // MAPOKEZI YA RUHUSA KUTOKA KWENYE ANDROID OS (BILA HII KAMERA HAITAFANYA KAZI)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Kama mtumiaji akibonyeza ALLOW, ipitishe kwenda kwenye website pia
+                if (mPermissionRequest != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mPermissionRequest.grant(mPermissionRequest.getResources());
+                }
+            } else {
+                Toast.makeText(this, "Ruhusa imekataliwa! Website haitaweza kutumia Kamera/Audio.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -253,9 +303,6 @@ public class MainActivity extends AppCompatActivity {
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.READ_CONTACTS);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
