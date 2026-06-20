@@ -12,6 +12,7 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -20,7 +21,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -31,9 +31,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     
-    // MKATABA MPYA: OneSignal SDK ya Push Notifications (v5)
-    implementation 'com.onesignal:OneSignal:[5.6.1, 5.9.99]'
-    implementation 'androidx.biometric:biometric:1.1.0'
+    // HII NDIO CODE YA ADMOB ILIOMBA (Google Mobile Ads SDK)
+    implementation 'com.google.android.gms:play-services-ads:23.0.0'
 }
