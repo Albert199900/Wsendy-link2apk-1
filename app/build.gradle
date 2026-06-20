@@ -32,6 +32,12 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     
-    // HII NDIO CODE YA ADMOB ILIOMBA (Google Mobile Ads SDK)
+    // Hii inahitajika kwa sababu unatumia SwipeRefreshLayout kwenye activity_main.xml
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    
+    // CODE YA ADMOB (Google Mobile Ads SDK)
     implementation 'com.google.android.gms:play-services-ads:23.0.0'
+
+    // CODE YA ONESIGNAL (Ili kuzuia ile error ya ApplicationClass)
+    implementation 'com.onesignal:OneSignal:5.1.2'
 }
