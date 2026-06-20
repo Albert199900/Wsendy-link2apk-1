@@ -9,7 +9,7 @@
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_navigation">
+        android:layout_above="@id/adView">
 
         <WebView
             android:id="@+id/webview"
@@ -21,7 +21,7 @@
         android:id="@+id/offline_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_navigation"
+        android:layout_above="@id/adView"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="20dp"
@@ -74,13 +74,22 @@
         android:id="@+id/btn_camera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/bottom_navigation"
+        android:layout_above="@id/adView"
         android:layout_alignParentEnd="true"
         android:layout_margin="20dp"
         android:contentDescription="Washa Kamera"
         android:backgroundTint="#2196F3"
         app:tint="#FFFFFF"
         app:srcCompat="@android:drawable/ic_menu_camera" />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/bottom_navigation"
+        app:adSize="BANNER"
+        app:adUnitId="ca-app-pub-6800195132094494/2296745447" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
