@@ -30,6 +30,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+// CODE ZA ADMOB ZILIZOONGEZEKA HAPA CHINI
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -43,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout offlineLayout;
     private Button btnRetry;
     
+    // TANGANO LA ADMOB
+    private AdView mAdView;
+    
     // Weka URL yako halisi ya WSendy hapa
     private static final String TARGET_URL = "https://www.google.com"; 
     private static final int PERMISSION_REQUEST_CODE = 100;
@@ -55,6 +66,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 1. KUWASHA ADMOB APP MAPEMA
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(@NonNull InitializationStatus initializationStatus) {
+                // AdMob imewaka tayari
+            }
+        });
+
         // Kuanzisha vishikwambi
         myWebView = findViewById(R.id.webview);
         progressBar = findViewById(R.id.loading_bar);
@@ -62,6 +81,11 @@ public class MainActivity extends AppCompatActivity {
         btnRetry = findViewById(R.id.btn_retry);
         FloatingActionButton btnCamera = findViewById(R.id.btn_camera);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+        // 2. KUPAKIA TANGAZO LA BANNER (Chini ya App)
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         // Kuomba Ruhusa zote mapema App ikifunguka
         checkAndRequestPermissions();
@@ -77,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setMediaPlaybackRequiresUserGesture(false);
 
-        // 1. MABORESHO YA MUONEKANO: Kulazimisha muonekano wa skrini pana (Kama Picha Yako)
+        // MABORESHO YA MUONEKANO: Kulazimisha muonekano wa skrini pana
         String desktopUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
         webSettings.setUserAgentString(desktopUserAgent);
         webSettings.setUseWideViewPort(true);
@@ -140,14 +164,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 2. MABORESHO YA RUHUSA: Kuruhusu Mic na Kamera kwa pamoja bila ubaguzi
+        // MABORESHO YA RUHUSA: Kuruhusu Mic na Kamera kwa pamoja bila ubaguzi
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 mPermissionRequest = request; 
                 runOnUiThread(() -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        // Inapatia website rasilimali zote inazoomba (Kamera + Mic kwa mpigo)
                         request.grant(request.getResources());
                     }
                 });
@@ -233,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
         myWebView.loadUrl(TARGET_URL);
     }
 
-    // MAPOKEZI YA RUHUSA: Kurekebishwa ili ikubali hata kama mtumiaji ameruhusu zote
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
