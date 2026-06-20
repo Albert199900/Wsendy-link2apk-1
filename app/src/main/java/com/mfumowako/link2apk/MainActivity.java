@@ -31,7 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-// CODE ZA ADMOB ZILIZOONGEZEKA HAPA CHINI
+// CODE ZA ADMOB
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout offlineLayout;
     private Button btnRetry;
     
-    // TANGANO LA ADMOB
+    // TANGAZO LA ADMOB
     private AdView mAdView;
     
     // Weka URL yako halisi ya WSendy hapa
@@ -66,11 +66,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 1. KUWASHA ADMOB APP MAPEMA
+        // KUWASHA ADMOB APP MAPEMA
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(@NonNull InitializationStatus initializationStatus) {
-                // AdMob imewaka tayari
             }
         });
 
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton btnCamera = findViewById(R.id.btn_camera);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
-        // 2. KUPAKIA TANGAZO LA BANNER (Chini ya App)
+        // KUPAKIA TANGAZO LA BANNER
         mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
@@ -101,14 +100,22 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setMediaPlaybackRequiresUserGesture(false);
 
-        // MABORESHO YA MUONEKANO: Kulazimisha muonekano wa skrini pana
-        String desktopUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-        webSettings.setUserAgentString(desktopUserAgent);
+        // ======================================================================
+        // SEHEMU YA MUHIMU: KULAZIMISHA MUONEKANO WA DESKTOP/LAPTOP (KAMA WSENDY)
+        // ======================================================================
+        // Tunabadilisha utambulisho kuwa Kivinjari cha Windows 11 Chrome halisi
+        String laptopUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+        webSettings.setUserAgentString(laptopUserAgent);
+        
+        // Hizi code mbili zinalazimisha screen ijikunjue kwa upana wa kompyuta na ijipunguze (Zoom Out) kuenea kwenye simu
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
+        
+        // Ruhusu mtumiaji aweza kukuza au kupunguza mwenyewe akitaka (Zoom)
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false); 
+        webSettings.setDisplayZoomControls(false); // Inaficha vile vitufe vya + na - vya kizamani vya zoom
+        // ======================================================================
 
         // Mfumo wa Kudownload Mafaili
         myWebView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
@@ -164,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // MABORESHO YA RUHUSA: Kuruhusu Mic na Kamera kwa pamoja bila ubaguzi
+        // Maboresho ya Ruhusa za Ndani ya WebView
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
