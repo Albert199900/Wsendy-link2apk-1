@@ -22,26 +22,26 @@
 
 <div class="form-container">
     <h2>Link2APK Turbo</h2>
-    <div class="subtitle">Mfumo salama wa WSendy wa kutengeneza programu za Android</div>
+    <div class="subtitle">Mfumo wa papo hapo wa WSendy wa kutengeneza programu za Android</div>
     
-    <label>Jina la App:</label>
-    <input type="text" id="appName" placeholder="Mfano: WSendy App" required>
+    <label>Jina la App Yako:</label>
+    <input type="text" id="appName" placeholder="Mfano: Aplikasi Yangu" required>
 
-    <label>Link ya Website:</label>
-    <input type="url" id="targetUrl" placeholder="https://www.wsendy.download" required>
+    <label>Link ya Tovuti Yako:</label>
+    <input type="url" id="targetUrl" placeholder="https://www.google.com" required>
 
     <label>Link ya Logo ya App (.png au .jpg):</label>
     <input type="url" id="logoUrl" value="https://i.ibb.co/wNSCPND3/1781975161577.png" required>
 
-    <label>Barua Pepe ya Kupokelea APK:</label>
+    <label>Email ya Mteja (Kupokelea APK):</label>
     <input type="email" id="userEmail" placeholder="mfano@gmail.com" required>
 
-    <button id="btnSubmit" onclick="hifadhiFirebase()">Anza Kuunda APK</button>
+    <button id="btnSubmit" onclick="anzishaMchakatoPapoHapo()">Anza Kuunda APK</button>
     <p id="status"></p>
 </div>
 
 <script>
-function hifadhiFirebase() {
+function anzishaMchakatoPapoHapo() {
     const appName = document.getElementById('appName').value.trim();
     const targetUrl = document.getElementById('targetUrl').value.trim();
     const logoUrl = document.getElementById('logoUrl').value.trim();
@@ -54,35 +54,51 @@ function hifadhiFirebase() {
         return;
     }
 
-    statusText.innerText = "Inatuma ombi lako... Tafadhali subiri...";
+    statusText.innerText = "Inawasha mitambo ya WSendy Turbo... Tafadhali subiri...";
     statusText.style.color = "#8fa0dd";
     btn.disabled = true;
     btn.style.backgroundColor = "#2e3c56";
 
-    // Data inahifadhiwa kwenye eneo jipya linaloitwa /sasa_hivi.json
-    const FIREBASE_URL = "https://studio-6468952106-54f12-default-rtdb.firebaseio.com/sasa_hivi.json";
+    // Hapa inasoma kutoka kwenye lile eneo la ufunguo uliloweka mapema
+    const FIREBASE_URL = "https://studio-6468952106-54f12-default-rtdb.firebaseio.com/siri.json";
 
-    fetch(FIREBASE_URL, {
-        method: 'PUT', // 'PUT' inabadilisha data iliyopo ili iwe moja tu kila wakati
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            app_name: appName,
-            target_url: targetUrl,
-            logo_url: logoUrl,
-            user_email: userEmail,
-            washa: true // Hii ni taa ya kuambia GitHub "waka mtambo!"
-        })
-    })
+    fetch(FIREBASE_URL)
     .then(res => {
-        if(res.ok) {
-            statusText.innerHTML = "🎉 <span style='color: #00ff66;'>Ombi limepokelewa!</span><br><span style='color: #ffffff; font-size: 13px;'>Mtambo wa WSendy Turbo umeanza kazi chini kwa chini. Angalia email yako baada ya dakika 3.</span>";
+        if(!res.ok) { throw new Error("Firebase error"); }
+        return res.json();
+    })
+    .then(token => {
+        if (!token) { throw new Error("Token haipo!"); }
+
+        // Ilasimishe kuwasha 'build-apk.yml' kwa siri hapo hapo
+        return fetch('https://api.github.com/repos/Albert199900/Wsendy-link2apk-1/actions/workflows/build-apk.yml/dispatches', {
+            method: 'POST',
+            headers: {
+                'Authorization': `token ${token.trim()}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ref: 'main', 
+                inputs: {
+                    app_name: appName,
+                    target_url: targetUrl,
+                    logo_url: logoUrl,
+                    user_email: userEmail
+                }
+            })
+        });
+    })
+    .then(response => {
+        if (response.status === 204 || response.status === 200) {
+            statusText.innerHTML = "🎉 <span style='color: #00ff66;'>Mtambo umewaka papo hapo!</span><br><span style='color: #ffffff; font-size: 13px;'>Mchakato umeanza kule GitHub Actions chini kwa chini. Angalia email yako baada ya dakika 3.</span>";
         } else {
-            throw new Error("Firebase imekataa");
+            return response.text().then(text => { throw new Error(text) });
         }
     })
     .catch(error => {
-        statusText.innerText = "Mawasiliano yamefeli. Hakikisha Rules za Firebase ziko true.";
-        statusText.style.color = "red";
+        console.error(error);
+        statusText.innerHTML = "❌ <span style='color: red;'>Mchakato umefeli!</span><br><span style='color: #ffcccc; font-size: 12px;'>Jaribu tena. Hakikisha ufunguo wa Firebase upo sahihi.</span>";
         btn.disabled = false;
         btn.style.backgroundColor = "#00ff66";
     });
