@@ -15,6 +15,9 @@ on:
         description: 'Link ya Logo ya App (.png au .jpg)'
         required: true
         default: 'https://cdn-icons-png.flaticon.com/512/888/888857.png'
+      user_email:
+        description: 'Email ya Mteja (Kupokelea APK)'
+        required: true
 
 jobs:
   build:
@@ -61,7 +64,6 @@ jobs:
         $ZIPALIGN -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/wsendy-aligned.apk
         $APKSIGNER sign --ks app/build/outputs/apk/release/wsendy.jks --ks-pass pass:"${{ secrets.KEY_STORE_PASSWORD }}" --key-pass pass:"${{ secrets.KEY_PASSWORD }}" --out app/build/outputs/apk/release/wsendy-final.apk app/build/outputs/apk/release/wsendy-aligned.apk
 
-    # ZIP PACKAGE: Hapa tunahifadhi APK pamoja na Key (.jks) ili uzi-download zote kwa pamoja
     - name: Kuhifadhi APK na Keystore (GitHub Artifact)
       uses: actions/upload-artifact@v4
       with:
@@ -69,3 +71,23 @@ jobs:
         path: |
           app/build/outputs/apk/release/wsendy-final.apk
           app/build/outputs/apk/release/wsendy.jks
+
+    # HATUA MPYA: Inatuma barua pepe kwa mteja ikiwa imemwambia jina la app na kuambatanisha APK yake
+    - name: Tuma APK kwa Email ya Mteja
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: APK ya ${{ github.event.inputs.app_name }} Ipo Tayari!
+        to: ${{ github.event.inputs.user_email }}
+        from: Wsendy Link2APK Builder <${{ secrets.EMAIL_USERNAME }}>
+        body: |
+          Habari,
+          
+          Mchakato wa kutengeneza App yako ya "${{ github.event.inputs.app_name }}" umekamilika kikamilifu.
+          Faili lako la APK ya Release limeshasainiwa na limeambatishwa chini ya barua pepe hii (Attachment).
+          
+          Asante kwa kutumia huduma yetu!
+        attachments: app/build/outputs/apk/release/wsendy-final.apk
