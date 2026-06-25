@@ -87,7 +87,8 @@
     <input type="url" id="targetUrl" placeholder="https://www.tovuti.com" required>
 
     <label>Link ya Logo ya App (.png au .jpg):</label>
-    <input type="url" id="logoUrl" placeholder="https://site.com/logo.png" required>
+    <!-- HAPA LOGO YAKO IMEWEKWA KUWA DEFAULT KWENYE VALUE -->
+    <input type="url" id="logoUrl" value="https://i.ibb.co/wNSCPND3/1781975161577.png" required>
 
     <label>Barua Pepe (Email) Yako:</label>
     <input type="email" id="userEmail" placeholder="mfano@gmail.com" required>
@@ -104,7 +105,6 @@ function tumaOmbi() {
     const userEmail = document.getElementById('userEmail').value.trim();
     const statusText = document.getElementById('status');
 
-    // Uhakiki wa visanduku kama vimejazwa
     if(!appName || !targetUrl || !logoUrl || !userEmail) {
         alert("Tafadhali jaza nafasi zote!");
         return;
@@ -113,24 +113,14 @@ function tumaOmbi() {
     statusText.innerText = "Inatayarisha data... Tafadhali subiri...";
     statusText.style.color = "#333";
 
-    // MAELEZO YAKO YA GITHUB - YAKO SAHIHI HAPA
     const GITHUB_USERNAME = "Albert199900";
-    const REPO_NAME = "wsendy-link2apk-1";
-    
-    // Kuandaa vigezo (parameters) vya kwenda navyo GitHub
-    const params = new URLSearchParams({
-        app_name: appName,
-        target_url: targetUrl,
-        logo_url: logoUrl,
-        user_email: userEmail
-    });
+    const REPO_NAME = "Wsendy-link2apk-1"; 
 
-    statusText.innerText = "🎉 Kila kitu kiko sawa! Inakupeleka GitHub kukamilisha...";
+    statusText.innerText = "🎉 Inakupeleka GitHub Actions sasa hivi...";
     statusText.style.color = "green";
 
-    // Kumhamisha mtumiaji kwenda kwenye fomu ya GitHub Actions baada ya sekunde 1.5
     setTimeout(() => {
-        window.location.href = `https://github.com/${GITHUB_USERNAME}/${REPO_NAME}/actions/workflows/android.yml?${params.toString()}`;
+        window.location.href = `https://github.com/${GITHUB_USERNAME}/${REPO_NAME}/actions/workflows/android.yml`;
     }, 1500);
 }
 </script>
