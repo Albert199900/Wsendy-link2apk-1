@@ -53,18 +53,19 @@ jobs:
     - name: Kuanza kutengeneza APK ya Release
       run: ./gradlew assembleRelease
 
-    # HAPA INATUMIA KEY ZA GITHUB SECRETS KWA USALAMA ZAIDI
     - name: Kutengeneza Keystore na Kusaini APK Kiotomatiki
       run: |
         keytool -genkey -v -keystore app/build/outputs/apk/release/wsendy.jks -keyalg RSA -keysize 2048 -validity 10000 -alias wsendy -storepass "${{ secrets.KEY_STORE_PASSWORD }}" -keypass "${{ secrets.KEY_PASSWORD }}" -dname "CN=wsendy, OU=App, O=Wsendy, L=Dar, S=Tanzania, C=TZ"
-        APKSIGNER=$(find $ANDROID_HOME/build-tools/ ki-name apksigner | sort -V | tail -n 1)
+        APKSIGNER=$(find $ANDROID_HOME/build-tools/ -name apksigner | sort -V | tail -n 1)
         ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort -V | tail -n 1)
         $ZIPALIGN -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/wsendy-aligned.apk
         $APKSIGNER sign --ks app/build/outputs/apk/release/wsendy.jks --ks-pass pass:"${{ secrets.KEY_STORE_PASSWORD }}" --key-pass pass:"${{ secrets.KEY_PASSWORD }}" --out app/build/outputs/apk/release/wsendy-final.apk app/build/outputs/apk/release/wsendy-aligned.apk
 
-    # APK itahifadhiwa hapa tu GitHub, utaidownload kwenye ukurasa wa Actions
-    - name: Kuhifadhi APK Imesainiwa (GitHub Artifact)
+    # ZIP PACKAGE: Hapa tunahifadhi APK pamoja na Key (.jks) ili uzi-download zote kwa pamoja
+    - name: Kuhifadhi APK na Keystore (GitHub Artifact)
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.inputs.app_name }}-Release-APK
-        path: app/build/outputs/apk/release/wsendy-final.apk
+        name: ${{ github.event.inputs.app_name }}-Release-Package
+        path: |
+          app/build/outputs/apk/release/wsendy-final.apk
+          app/build/outputs/apk/release/wsendy.jks
