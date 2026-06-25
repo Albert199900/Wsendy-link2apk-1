@@ -72,14 +72,15 @@ jobs:
           app/build/outputs/apk/release/wsendy-final.apk
           app/build/outputs/apk/release/wsendy.jks
 
-    # HATUA MPYA: Inapakia APK kwenye mtandao wa transfer.sh kupata link
+    # SEHEMU ILIYOBORESHWA NA KUONDOA ERROR YA SPACES NA TRANSFER.SH
     - name: Kutengeneza Link ya Kudownload APK
       id: upload_apk
       run: |
-        DOWNLOAD_URL=$(curl --upload-file app/build/outputs/apk/release/wsendy-final.apk https://transfer.sh/${{ github.event.inputs.app_name }}.apk)
+        CLEAN_NAME=$(echo "${{ github.event.inputs.app_name }}" | tr -d ' ')
+        DOWNLOAD_URL=$(curl -F "file=@app/build/outputs/apk/release/wsendy-final.apk" https://bashupload.com/${CLEAN_NAME}.apk | grep -o 'https://bashupload.com/[^ ]*')
         echo "apk_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
 
-    # HATUA ILIYOBORESHWA: Inatuma barua pepe yenye Link badala ya attachment
+    # SEHEMU YA EMAIL: Sasa hivi itatuma link ya bashupload ambayo haitakataliwa na Google
     - name: Tuma APK kwa Email ya Mteja
       uses: dawidd6/action-send-mail@v4
       with:
@@ -97,7 +98,5 @@ jobs:
           
           Bofya link iliyopo chini kuipakua (Download) APK yako rasmi ya Release moja kwa moja kwenye simu yako:
           ${{ steps.upload_apk.outputs.apk_url }}
-          
-          Kumbuka: Link hii itafanya kazi kwa muda wa siku 14.
           
           Asante kwa kutumia huduma yetu!
