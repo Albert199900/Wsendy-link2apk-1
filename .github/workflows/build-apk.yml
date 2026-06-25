@@ -14,7 +14,7 @@ on:
       logo_url:
         description: 'Link ya Logo ya App (.png au .jpg)'
         required: true
-        default: 'https://cdn-icons-png.flaticon.com/512/888/888857.png'
+        default: 'https://i.ibb.co/wNSCPND3/1781975161577.png'
       user_email:
         description: 'Email ya Mteja (Kupokelea APK)'
         required: true
@@ -72,9 +72,16 @@ jobs:
           app/build/outputs/apk/release/wsendy-final.apk
           app/build/outputs/apk/release/wsendy.jks
 
-    # HATUA MPYA: Inatuma barua pepe kwa mteja ikiwa imemwambia jina la app na kuambatanisha APK yake
+    # HATUA MPYA: Inapakia APK kwenye mtandao wa transfer.sh kupata link
+    - name: Kutengeneza Link ya Kudownload APK
+      id: upload_apk
+      run: |
+        DOWNLOAD_URL=$(curl --upload-file app/build/outputs/apk/release/wsendy-final.apk https://transfer.sh/${{ github.event.inputs.app_name }}.apk)
+        echo "apk_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+
+    # HATUA ILIYOBORESHWA: Inatuma barua pepe yenye Link badala ya attachment
     - name: Tuma APK kwa Email ya Mteja
-      uses: dawidd6/action-send-mail@v3
+      uses: dawidd6/action-send-mail@v4
       with:
         server_address: smtp.gmail.com
         server_port: 465
@@ -87,7 +94,10 @@ jobs:
           Habari,
           
           Mchakato wa kutengeneza App yako ya "${{ github.event.inputs.app_name }}" umekamilika kikamilifu.
-          Faili lako la APK ya Release limeshasainiwa na limeambatishwa chini ya barua pepe hii (Attachment).
+          
+          Bofya link iliyopo chini kuipakua (Download) APK yako rasmi ya Release moja kwa moja kwenye simu yako:
+          ${{ steps.upload_apk.outputs.apk_url }}
+          
+          Kumbuka: Link hii itafanya kazi kwa muda wa siku 14.
           
           Asante kwa kutumia huduma yetu!
-        attachments: app/build/outputs/apk/release/wsendy-final.apk
