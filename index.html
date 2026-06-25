@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wsendy Link2APK Builder</title>
+    <title>WSendy Turbo - Link2APK</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
             padding: 20px; 
-            background-color: #f4f4f9; 
+            background-color: #0b0f19; /* Rangi ya giza ya WSendy Turbo */
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -16,112 +16,163 @@
             margin: 0; 
         }
         .form-container { 
-            max-width: 400px; 
+            max-width: 420px; 
             width: 100%; 
-            background: white; 
+            background: #161c2a; /* Kisanduku cha ndani */
             padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            border-radius: 16px; 
+            box-shadow: 0 4px 25px rgba(0,0,0,0.4); 
+            border: 1px solid #1f293d;
         }
         h2 { 
             text-align: center; 
-            color: #333; 
+            color: #00ff66; /* Kijani cha WSendy Turbo */
             margin-bottom: 5px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .subtitle {
-            text-align: center;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 20px;
+        .subtitle { 
+            text-align: center; 
+            font-size: 13px; 
+            color: #8fa0dd; 
+            margin-bottom: 25px; 
         }
         label { 
             font-weight: bold; 
-            color: #555; 
+            color: #ccd6f6; 
             display: block; 
-            margin-top: 12px; 
+            margin-top: 15px; 
+            font-size: 13px;
         }
         input, button { 
             width: 100%; 
-            padding: 12px; 
+            padding: 14px; 
             margin: 8px 0; 
-            border-radius: 6px; 
-            border: 1px solid #ccc; 
+            border-radius: 8px; 
             box-sizing: border-box; 
             font-size: 14px; 
         }
-        input:focus {
-            border-color: #28a745;
-            outline: none;
+        input {
+            background-color: #0b0f19;
+            border: 1px solid #2e3c56;
+            color: #ffffff;
+            transition: 0.3s;
+        }
+        input:focus { 
+            border-color: #00ff66; 
+            outline: none; 
+            box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
         }
         button { 
-            background-color: #28a745; 
-            color: white; 
+            background-color: #00ff66; 
+            color: #0b0f19; 
             border: none; 
             cursor: pointer; 
             font-size: 16px; 
             font-weight: bold; 
             transition: 0.3s; 
-            margin-top: 15px;
+            margin-top: 20px; 
+            text-transform: uppercase;
         }
         button:hover { 
-            background-color: #218838; 
+            background-color: #00cc52; 
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
         }
         #status { 
             text-align: center; 
             font-weight: bold; 
-            margin-top: 15px; 
-            font-size: 14px;
+            margin-top: 20px; 
+            font-size: 14px; 
+            line-height: 1.5; 
         }
     </style>
 </head>
 <body>
 
 <div class="form-container">
-    <h2>Unda APK Yako Papo Hapo</h2>
-    <div class="subtitle">Jaza taarifa kisha APK itatumwa kwenye Email yako ikikamilika.</div>
+    <h2>Link2APK Turbo</h2>
+    <div class="subtitle">Mfumo salama wa WSendy wa kutengeneza programu za Android</div>
     
     <label>Jina la App:</label>
-    <input type="text" id="appName" placeholder="Mfano: Duka Langu" required>
+    <input type="text" id="appName" placeholder="Mfano: WSendy App" required>
 
     <label>Link ya Website:</label>
-    <input type="url" id="targetUrl" placeholder="https://www.tovuti.com" required>
+    <input type="url" id="targetUrl" placeholder="https://www.wsendy.download" required>
 
     <label>Link ya Logo ya App (.png au .jpg):</label>
-    <!-- HAPA LOGO YAKO IMEWEKWA KUWA DEFAULT KWENYE VALUE -->
     <input type="url" id="logoUrl" value="https://i.ibb.co/wNSCPND3/1781975161577.png" required>
 
-    <label>Barua Pepe (Email) Yako:</label>
+    <label>Barua Pepe ya Kupokelea APK:</label>
     <input type="email" id="userEmail" placeholder="mfano@gmail.com" required>
 
-    <button onclick="tumaOmbi()">Anza Kuunda APK</button>
+    <button id="btnSubmit" onclick="anzishaMchakato()">Anza Kuunda APK</button>
     <p id="status"></p>
 </div>
 
 <script>
-function tumaOmbi() {
+function anzishaMchakato() {
     const appName = document.getElementById('appName').value.trim();
     const targetUrl = document.getElementById('targetUrl').value.trim();
     const logoUrl = document.getElementById('logoUrl').value.trim();
     const userEmail = document.getElementById('userEmail').value.trim();
     const statusText = document.getElementById('status');
+    const btn = document.getElementById('btnSubmit');
 
     if(!appName || !targetUrl || !logoUrl || !userEmail) {
         alert("Tafadhali jaza nafasi zote!");
         return;
     }
 
-    statusText.innerText = "Inatayarisha data... Tafadhali subiri...";
-    statusText.style.color = "#333";
+    statusText.innerText = "Inawasha mitambo ya WSendy Turbo... Tafadhali subiri...";
+    statusText.style.color = "#8fa0dd";
+    btn.disabled = true;
+    btn.style.backgroundColor = "#2e3c56";
+    btn.style.color = "#8fa0dd";
 
-    const GITHUB_USERNAME = "Albert199900";
-    const REPO_NAME = "Wsendy-link2apk-1"; 
+    // ⚠️ LINK HALISI YA DATABASE YAKO KUTOKA KWENYE PICHA YAKO YA FIREBASE:
+    const FIREBASE_URL = "https://studio-6468952106-54f12-default-rtdb.firebaseio.com/siri.json";
 
-    statusText.innerText = "🎉 Inakupeleka GitHub Actions sasa hivi...";
-    statusText.style.color = "green";
+    // Hatua ya 1: Vuta Token kutoka Firebase Realtime Database
+    fetch(FIREBASE_URL)
+    .then(res => res.json())
+    .then(token => {
+        if (!token) { throw new Error("Token haijapatikana kwenye Firebase!"); }
 
-    setTimeout(() => {
-        window.location.href = `https://github.com/${GITHUB_USERNAME}/${REPO_NAME}/actions/workflows/android.yml`;
-    }, 1500);
+        // Hatua ya 2: Tuma amri kwa siri GitHub Actions kutumia Token hiyo
+        return fetch('https://api.github.com/repos/Albert199900/Wsendy-link2apk-1/actions/workflows/android.yml/dispatches', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ref: 'main',
+                inputs: {
+                    app_name: appName,
+                    target_url: targetUrl,
+                    logo_url: logoUrl,
+                    user_email: userEmail
+                }
+            })
+        });
+    })
+    .then(response => {
+        // Ikiwa GitHub imepokea amri vizuri (Status 204 au 200)
+        if (response.status === 204 || response.status === 200) {
+            statusText.innerHTML = "🎉 <span style='color: #00ff66;'>Ombi limepokelewa kikamilifu!</span><br><span style='color: #ffffff; font-size: 13px;'>Mtambo umeanza kuunda APK yako chini kwa chini. Angalia email yako baada ya dakika 3.</span>";
+        } else {
+            throw new Error("GitHub imekataa kuwasha workflow. Angalia ruhusa za Token.");
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        statusText.innerText = "Mchakato umefeli! Hakikisha link ya Firebase na Token vipo sawa.";
+        statusText.style.color = "red";
+        btn.disabled = false;
+        btn.style.backgroundColor = "#00ff66";
+        btn.style.color = "#0b0f19";
+    });
 }
 </script>
 
