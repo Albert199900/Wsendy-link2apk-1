@@ -72,14 +72,20 @@ jobs:
           app/build/outputs/apk/release/wsendy-final.apk
           app/build/outputs/apk/release/wsendy.jks
 
-    # SEHEMU MPYA: Inapakia APK kwenye seva imara sana ya 0x0.st ambayo haina shida ya SSL wala spaces
-    - name: Kutengeneza Link ya Kudownload APK
-      id: upload_apk
-      run: |
-        DOWNLOAD_URL=$(curl -F "file=@app/build/outputs/apk/release/wsendy-final.apk" https://0x0.st)
-        echo "apk_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+    # MFUMO MPYA: Inatengeneza Release rasmi ndani ya GitHub na kupandisha faili huko salama
+    - name: Kutengeneza Link ya Kudownload APK (GitHub Release)
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }} - ${{ github.event.inputs.app_name }}
+        draft: false
+        prerelease: false
+        files: app/build/outputs/apk/release/wsendy-final.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # SEHEMU YA EMAIL: Inatuma barua pepe ikiwa na link rasmi isiyozuiwa na Google
+    # MFUMO WA EMAIL: Inatuma barua pepe ikiwa na link ya kudumu kutoka GitHub ya kupakua APK
     - name: Tuma APK kwa Email ya Mteja
       uses: dawidd6/action-send-mail@v4
       with:
@@ -95,7 +101,7 @@ jobs:
           
           Mchakato wa kutengeneza App yako ya "${{ github.event.inputs.app_name }}" umekamilika kikamilifu.
           
-          Bofya link iliyopo chini kuipakua (Download) APK yako rasmi ya Release moja kwa moja kwenye simu yako:
-          ${{ steps.upload_apk.outputs.apk_url }}
+          Bofya link iliyopo chini kuipakua (Download) APK yako rasmi ya Release moja kwa moja kwenye simu yako kutoka GitHub:
+          https://github.com/${{ github.repository }}/releases/download/v${{ github.run_number }}/wsendy-final.apk
           
           Asante kwa kutumia huduma yetu!
