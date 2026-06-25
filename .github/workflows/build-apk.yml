@@ -72,15 +72,14 @@ jobs:
           app/build/outputs/apk/release/wsendy-final.apk
           app/build/outputs/apk/release/wsendy.jks
 
-    # SEHEMU ILIYOBORESHWA NA KUONDOA ERROR YA SPACES NA TRANSFER.SH
+    # SEHEMU MPYA: Inapakia APK kwenye seva imara sana ya 0x0.st ambayo haina shida ya SSL wala spaces
     - name: Kutengeneza Link ya Kudownload APK
       id: upload_apk
       run: |
-        CLEAN_NAME=$(echo "${{ github.event.inputs.app_name }}" | tr -d ' ')
-        DOWNLOAD_URL=$(curl -F "file=@app/build/outputs/apk/release/wsendy-final.apk" https://bashupload.com/${CLEAN_NAME}.apk | grep -o 'https://bashupload.com/[^ ]*')
+        DOWNLOAD_URL=$(curl -F "file=@app/build/outputs/apk/release/wsendy-final.apk" https://0x0.st)
         echo "apk_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
 
-    # SEHEMU YA EMAIL: Sasa hivi itatuma link ya bashupload ambayo haitakataliwa na Google
+    # SEHEMU YA EMAIL: Inatuma barua pepe ikiwa na link rasmi isiyozuiwa na Google
     - name: Tuma APK kwa Email ya Mteja
       uses: dawidd6/action-send-mail@v4
       with:
