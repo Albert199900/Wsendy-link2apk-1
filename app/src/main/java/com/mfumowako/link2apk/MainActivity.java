@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -93,12 +94,17 @@ public class MainActivity extends AppCompatActivity {
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setSupportMultipleWindows(true);
         webSettings.setDatabaseEnabled(true);
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
         webSettings.setGeolocationEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setMediaPlaybackRequiresUserGesture(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
 
         // ======================================================================
         // SEHEMU YA MUHIMU: KULAZIMISHA MUONEKANO WA DESKTOP/LAPTOP (KAMA WSENDY)
@@ -213,6 +219,23 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Huwezi kufungua stoo ya faili", Toast.LENGTH_SHORT).show();
                     return false;
                 }
+                return true;
+            }
+
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                if (resultMsg == null) return false;
+                WebView.HitTestResult result = view.getHitTestResult();
+                String data = result != null ? result.getExtra() : null;
+                if (data != null) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(data));
+                    startActivity(browserIntent);
+                    return false;
+                }
+                WebView newWebView = new WebView(MainActivity.this);
+                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(newWebView);
+                resultMsg.sendToTarget();
                 return true;
             }
         });
